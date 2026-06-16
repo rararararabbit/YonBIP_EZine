@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { 
-  BookOpen, 
   Search, 
   Sparkles, 
   X, 
@@ -488,14 +487,6 @@ export default function App() {
 
             {/* Articles Column / Grid */}
             <section id="catalog-anchor" className="flex-1">
-              
-              {/* Active Category Display Ribbon */}
-              <div className="bg-[#1A1A1A] text-white px-4 py-2.5 flex justify-between items-center mb-6">
-                <span className="text-xs uppercase tracking-widest font-black flex items-center gap-2">
-                  <BookOpen size={14} className="text-[#D9432E]" /> 当前浏览栏目: {currentModule}
-                </span>
-                <span className="text-[10px] font-mono opacity-80">共有 {filteredArticles.length} 篇相关精选</span>
-              </div>
 
               {filteredArticles.length === 0 ? (
                 <div className="bg-white border-2 border-dashed border-[#1A1A1A]/13 p-16 text-center shadow-md">
