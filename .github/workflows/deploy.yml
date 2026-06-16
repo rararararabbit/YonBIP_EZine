@@ -8,23 +8,38 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy YonBIP_EZine to Server
-        uses: appleboy/ssh-action@v1.2.0
-        env:
-          GH_DEPLOY_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload build to server
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: 123.56.7.111
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
-          envs: GH_DEPLOY_TOKEN
+          source: "dist/,package.json,package-lock.json"
+          target: "/var/www/YonBIP_EZine"
+          overwrite: true
+
+      - name: Install production deps and restart
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 123.56.7.111
+          username: root
+          password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             set -e
-            if [ -z "$GH_DEPLOY_TOKEN" ]; then
-              echo "Missing GH_DEPLOY_TOKEN repository secret."
-              exit 1
-            fi
             cd /var/www/YonBIP_EZine
-            git pull "https://x-access-token:${GH_DEPLOY_TOKEN}@github.com/rarararabbit/YonBIP_EZine.git" main
-            npm install
-            npm run build
-            pm2 restart YonBIP_EZine
+            npm ci --omit=dev
+            NODE_ENV=production pm2 restart YonBIP_EZine --update-env || NODE_ENV=production pm2 start dist/server.cjs --name YonBIP_EZine
