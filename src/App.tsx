@@ -585,7 +585,10 @@ export default function App() {
 
       {/* 4. Immersive Full-Screen Reader Panel - beautifully integrated with layout options */}
       {activeArticle && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-center items-center p-3 md:p-6 transition-all">
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-center items-center p-3 md:p-6 transition-all"
+          onClick={() => setActiveArticle(null)}
+        >
           
           <div 
             className={`w-[95%] max-w-[95%] h-[95vh] max-h-[95vh] relative shadow-[8px_8px_0px_rgba(26,26,26,1)] flex flex-col md:rounded-lg overflow-hidden border-4 border-[#1A1A1A] ${
@@ -593,6 +596,7 @@ export default function App() {
                 ? "bg-[#faf8f5] text-[#241a17]" 
                 : "reader-theme-abyss bg-[#140b0c] text-[#fbf6f6]"
             }`}
+            onClick={(e) => e.stopPropagation()}
           >
             
             {/* Control Bar */}
