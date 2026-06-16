@@ -1,0 +1,6 @@
+{
+  "name": "BIP技术与架构(6月刊)",
+  "description": "BIP技术与架构（6月刊）数字电子杂志，由BIP技术与产品中心·总体设计部主编。包含架构殿堂、AI天空与技术茶馆等模块，带全端自适应排版与AI智能封面生成功能。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

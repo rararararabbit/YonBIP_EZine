@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Source Han Serif CJK", serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+  --font-display: "Space Grotesk", sans-serif;
+}
+
+@keyframes float-pincer {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+
+@keyframes float-pincer-rev {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(-3deg); }
+}
+
+.animate-float-pincer {
+  animation: float-pincer 4s ease-in-out infinite;
+}
+
+.animate-float-pincer-rev {
+  animation: float-pincer-rev 5s ease-in-out infinite;
+}
+
+/* Imported xiumius article body inside reader */
+.xiumi-article-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem auto;
+  display: block;
+}
+
+.xiumi-article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9em;
+}
+
+.xiumi-article-content table td,
+.xiumi-article-content table th {
+  border: 1px solid rgba(26, 26, 26, 0.15);
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+}
+
+.xiumi-article-content pre {
+  overflow-x: auto;
+  background: rgba(26, 26, 26, 0.04);
+  border-radius: 0.25rem;
+}
+
+/* Night mode: override xiumius inline dark text colors */
+.reader-theme-abyss .xiumi-article-content :is(
+  p, h1, h2, h3, h4, h5, h6,
+  li, span, em, strong, b, i,
+  td, th, div, pre, code, blockquote
+) {
+  color: #ffffff !important;
+}
+
+/* Elements with inline light rgb backgrounds (section bars, table headers, code blocks) */
+.reader-theme-abyss .xiumi-article-content [style*="background: rgb"],
+.reader-theme-abyss .xiumi-article-content [style*="background-color: rgb"] {
+  background: rgba(255, 255, 255, 0.14) !important;
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+}
+
+.reader-theme-abyss .xiumi-article-content th {
+  background: rgba(255, 255, 255, 0.16) !important;
+  background-color: rgba(255, 255, 255, 0.16) !important;
+  font-weight: 600;
+}
+
+.reader-theme-abyss .xiumi-article-content td {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.reader-theme-abyss .xiumi-article-content :is(h1, h2, h3, h4, h5, h6) {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.reader-theme-abyss .xiumi-article-content h2[style*="border-left"] {
+  border-left-color: #d9432e !important;
+}
+
+.reader-theme-abyss .xiumi-article-content a {
+  color: #ffd4cc !important;
+}
+
+.reader-theme-abyss .xiumi-article-content pre {
+  background: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.reader-theme-abyss .xiumi-article-content table td,
+.reader-theme-abyss .xiumi-article-content table th {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
