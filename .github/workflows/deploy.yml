@@ -9,14 +9,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy YonBIP_EZine to Server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GH_DEPLOY_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
         with:
           host: 123.56.7.111
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
+          envs: GH_DEPLOY_TOKEN
           script: |
+            set -e
+            if [ -z "$GH_DEPLOY_TOKEN" ]; then
+              echo "Missing GH_DEPLOY_TOKEN repository secret."
+              exit 1
+            fi
             cd /var/www/YonBIP_EZine
-            git pull origin main
+            git pull "https://x-access-token:${GH_DEPLOY_TOKEN}@github.com/rarararabbit/YonBIP_EZine.git" main
             npm install
             npm run build
             pm2 restart YonBIP_EZine
