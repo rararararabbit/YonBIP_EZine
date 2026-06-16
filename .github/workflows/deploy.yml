@@ -16,7 +16,6 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /var/www/YonBIP_EZine
-            git reset --hard origin/main
             git pull origin main
             npm install
             npm run build
