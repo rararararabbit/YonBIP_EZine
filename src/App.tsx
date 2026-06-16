@@ -504,7 +504,7 @@ export default function App() {
                       <article
                         key={article.id}
                         onClick={() => setActiveArticle(article)}
-                        className="group flex flex-col bg-white border-2 border-[#1A1A1A] hover:border-[#D9432E] transition-all duration-300 cursor-pointer shadow-[4px_4px_0px_rgba(26,26,26,1)] hover:shadow-[6px_6px_0px_rgba(217,67,46,1)]"
+                        className="group flex flex-col h-full bg-white border-2 border-[#1A1A1A] hover:border-[#D9432E] transition-all duration-300 cursor-pointer shadow-[4px_4px_0px_rgba(26,26,26,1)] hover:shadow-[6px_6px_0px_rgba(217,67,46,1)]"
                       >
                         {/* Dynamic AI Cover on top of each article card */}
                         <div className="w-full relative aspect-video bg-[#1a1a1a]">
@@ -521,8 +521,8 @@ export default function App() {
                         </div>
 
                         {/* Article Card Contents */}
-                        <div className="p-6 flex-1 flex flex-col justify-between">
-                          <div>
+                        <div className="px-6 pt-6 flex-1 flex flex-col min-h-0">
+                          <div className="flex-1">
                             {/* Metadata tags */}
                             <div className="flex justify-between items-center mb-3 text-[10px] uppercase font-bold text-[#D9432E]">
                               <span>#{article.category}</span>
@@ -538,13 +538,13 @@ export default function App() {
                             </h3>
 
                             {/* Short Excerpt */}
-                            <p className="text-xs text-[#1A1A1A]/70 leading-relaxed line-clamp-3 mb-6">
+                            <p className="text-xs text-[#1A1A1A]/70 leading-relaxed line-clamp-3">
                               {article.intro}
                             </p>
                           </div>
 
                           {/* Footer and interactive buttons */}
-                          <div className="pt-4 border-t border-[#D9432E]/20 mt-auto flex justify-end items-center">
+                          <div className="shrink-0 border-t border-[#D9432E]/20 mt-6 pt-4 pb-4 flex justify-end items-center">
                             {/* Big Bold custom detail click border button exactly matching target design specification */}
                             <span className="px-4 py-2 border-2 border-[#1A1A1A] font-bold text-[10px] uppercase tracking-widest text-[#1A1A1A] group-hover:bg-[#1A1A1A] group-hover:text-white transition-all">
                               View Article • 详情
