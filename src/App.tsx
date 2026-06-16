@@ -450,7 +450,7 @@ export default function App() {
             {/* Sidebar with Table of Contents */}
             <aside className="w-full lg:w-1/4 lg:border-r border-[#D9432E]/20 pr-0 lg:pr-8 py-2 flex flex-col justify-between gap-8">
               <div>
-                <h2 className="text-xs uppercase tracking-[0.3em] font-black text-[#D9432E] mb-6 flex items-center gap-2">
+                <h2 className="text-xs uppercase tracking-[0.3em] font-black text-[#D9432E] mb-4 flex items-center gap-2">
                   <SolidLobsterIcon className="w-4 h-4 text-[#D9432E] flex-shrink-0" />
                   Contents 目录
                 </h2>
