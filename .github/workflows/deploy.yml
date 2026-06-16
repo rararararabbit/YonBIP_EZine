@@ -1,0 +1,23 @@
+name: Deploy YonBIP_EZine
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy YonBIP_EZine to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 123.56.7.111
+          username: root
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            cd /var/www/YonBIP_EZine
+            git reset --hard origin/main
+            git pull origin main
+            npm install
+            npm run build
+            pm2 restart YonBIP_EZine
