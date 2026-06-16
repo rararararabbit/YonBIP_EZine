@@ -191,6 +191,12 @@ export default function App() {
   const [showAuthorModal, setShowAuthorModal] = useState(false);
   const [isCoverPage, setIsCoverPage] = useState(true); // WeChat starts with an elegant cover splash
 
+  useEffect(() => {
+    if (isCoverPage) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    }
+  }, [isCoverPage]);
+
   // Reader configuration states
   const [readerFontSize, setReaderFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
   const [readerTheme, setReaderTheme] = useState<"parchment" | "abyss">("parchment");
