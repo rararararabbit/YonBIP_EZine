@@ -585,11 +585,11 @@ export default function App() {
 
           {/* Footer Bar exactly matching Design HTML */}
           <footer className="mt-8 border-t-2 border-[#D9432E] pt-4 pb-2 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-[11px] font-bold tracking-wide text-[#1A1A1A]/50">
+            <div className="text-[11px] font-bold tracking-wide text-[#D9432E]/80">
               “在浪潮滚滚技术的海洋里，像深水龙虾一样拥有坚实保护甲壳，与持续进化的热插拔内核。”
             </div>
-            <div className="text-[11px] font-black tracking-wider text-[#D9432E]/80 font-sans">
-              BIP 技术与架构 (6月刊)
+            <div className="text-[11px] font-black tracking-wider text-[#1A1A1A]/50 font-sans">
+              版面设计：用户体验部
             </div>
           </footer>
 
