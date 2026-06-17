@@ -13,7 +13,8 @@ import {
   RefreshCw, 
   Eye,
   BookMarked,
-  Sun
+  Sun,
+  ExternalLink
 } from "lucide-react";
 import { Article, ModuleName } from "./types";
 import { initialArticles } from "./data";
@@ -550,11 +551,23 @@ export default function App() {
                           </div>
 
                           {/* Footer and interactive buttons */}
-                          <div className="shrink-0 border-t border-[#D9432E]/20 mt-6 pt-4 pb-4 flex justify-end items-center">
-                            {/* Big Bold custom detail click border button exactly matching target design specification */}
-                            <span className="px-4 py-2 border-2 border-[#1A1A1A] font-bold text-[10px] uppercase tracking-widest text-[#1A1A1A] group-hover:bg-[#1A1A1A] group-hover:text-white transition-all">
-                              View Article • 详情
+                          <div className="shrink-0 border-t border-[#D9432E]/20 mt-6 pt-4 pb-4 flex items-center gap-2">
+                            <span className="flex-1 min-w-0 px-4 py-2 border-2 border-[#1A1A1A] font-bold text-[10px] tracking-widest text-[#1A1A1A] text-center group-hover:bg-[#1A1A1A] group-hover:text-white transition-all">
+                              立即查看
                             </span>
+                            {article.sourceUrl && (
+                              <a
+                                href={article.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="跳转到原链接"
+                                aria-label="跳转到原链接"
+                                onClick={(e) => e.stopPropagation()}
+                                className="shrink-0 p-2 border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all"
+                              >
+                                <ExternalLink size={14} />
+                              </a>
+                            )}
                           </div>
                         </div>
                       </article>
@@ -610,7 +623,7 @@ export default function App() {
                 onClick={() => setActiveArticle(null)}
                 className="flex items-center gap-2 text-xs font-black uppercase tracking-widest px-4 py-2 bg-[#D9432E] text-[#fff5f5] border-2 border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_rgba(26,26,26,1)]"
               >
-                <X size={13} /> 返回目录 CLOSE
+                <X size={13} /> 返回目录
               </button>
 
               {/* Adjustments */}
