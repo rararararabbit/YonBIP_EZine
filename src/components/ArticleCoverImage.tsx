@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Sparkles, Image as ImageIcon, RotateCw } from "lucide-react";
+import { proxyImageUrl } from "../lib/imageProxy";
 
 interface ArticleCoverImageProps {
   title: string;
@@ -8,19 +9,24 @@ interface ArticleCoverImageProps {
   coverImage?: string;
 }
 
+function resolveCoverSrc(url: string): string {
+  return proxyImageUrl(url);
+}
+
 export default function ArticleCoverImage({
   title,
   category,
   articleId,
   coverImage,
 }: ArticleCoverImageProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(coverImage ?? null);
+  const resolvedCover = coverImage ? resolveCoverSrc(coverImage) : null;
+  const [imageUrl, setImageUrl] = useState<string | null>(resolvedCover);
   const [loading, setLoading] = useState(!coverImage);
   const [error, setError] = useState(false);
 
   const fetchCover = async () => {
     if (coverImage) {
-      setImageUrl(coverImage);
+      setImageUrl(resolveCoverSrc(coverImage));
       setLoading(false);
       setError(false);
       return;
@@ -47,7 +53,7 @@ export default function ArticleCoverImage({
 
   useEffect(() => {
     if (coverImage) {
-      setImageUrl(coverImage);
+      setImageUrl(resolveCoverSrc(coverImage));
       setLoading(false);
       setError(false);
       return;
@@ -102,7 +108,7 @@ export default function ArticleCoverImage({
         src={imageUrl}
         alt={`Cover for ${title}`}
         className="w-full h-full object-cover select-none pointer-events-none hover:scale-105 transition-transform duration-700 ease-out"
-        referrerPolicy="no-referrer"
+        onError={() => setError(true)}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none"></div>
     </div>

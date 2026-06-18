@@ -3,6 +3,12 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import {
+  getProxyReferer,
+  normalizeImageUrl,
+  rewriteArticleImages,
+  shouldProxyImageUrl,
+} from "./src/lib/imageProxy.ts";
 
 dotenv.config();
 
@@ -10,6 +16,43 @@ const app = express();
 app.use(express.json());
 
 const PORT = Number(process.env.PORT) || 3000;
+
+async function proxyImageHandler(req: express.Request, res: express.Response) {
+  const rawUrl = typeof req.query.url === "string" ? req.query.url : "";
+  if (!shouldProxyImageUrl(rawUrl)) {
+    return res.status(400).json({ error: "Invalid image url" });
+  }
+
+  const normalizedUrl = normalizeImageUrl(rawUrl);
+
+  try {
+    const parsed = new URL(normalizedUrl);
+    const referer = getProxyReferer(parsed.hostname);
+    const upstream = await fetch(normalizedUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Accept: "image/*,*/*",
+        ...(referer ? { Referer: referer } : {}),
+      },
+      redirect: "follow",
+    });
+    if (!upstream.ok) {
+      return res.status(upstream.status).json({ error: "Failed to fetch image" });
+    }
+
+    const contentType = upstream.headers.get("content-type") || "image/jpeg";
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    return res.send(buffer);
+  } catch (error) {
+    console.error("Failed to proxy image:", error);
+    return res.status(500).json({ error: "Failed to proxy image" });
+  }
+}
+
+app.get("/api/proxy-image", proxyImageHandler);
+app.get("/api/proxy-cover", proxyImageHandler);
 
 // Initialize GoogleGenAI client lazy-style
 let aiClient: GoogleGenAI | null = null;
@@ -305,9 +348,11 @@ function extractCellTextFromRaHtml(html: string): string {
 }
 
 function normalizeArticleHtml(html: string): string {
-  return html
-    .replace(/src="\/\//g, 'src="https://')
-    .replace(/href="\/\//g, 'href="https://');
+  return rewriteArticleImages(
+    html
+      .replace(/src="\/\//g, 'src="https://')
+      .replace(/href="\/\//g, 'href="https://')
+  );
 }
 
 async function fetchXiumiArticleHtml(sourceUrl: string): Promise<string> {

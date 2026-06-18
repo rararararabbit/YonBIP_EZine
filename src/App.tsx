@@ -19,6 +19,7 @@ import {
 import { Article, ModuleName } from "./types";
 import { initialArticles } from "./data";
 import ArticleCoverImage from "./components/ArticleCoverImage";
+import { rewriteArticleImages } from "./lib/imageProxy";
 
 function LobsterWatermark({ className }: { className?: string }) {
   return (
@@ -170,10 +171,19 @@ function SolidLobsterIcon({ className }: { className?: string }) {
 export default function App() {
   // Articles state with localStorage persistence
   const [articles, setArticles] = useState<Article[]>(() => {
-    const saved = localStorage.getItem("lobster_magazine_articles_v2");
+    const saved = localStorage.getItem("lobster_magazine_articles_v3");
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved) as Article[];
+        const builtInIds = new Set(initialArticles.map((article) => article.id));
+        const mergedBuiltIns = initialArticles.map((base) => {
+          const savedArticle = parsed.find((article) => article.id === base.id);
+          return savedArticle
+            ? { ...base, ...savedArticle, content: base.content, coverImage: base.coverImage }
+            : base;
+        });
+        const customArticles = parsed.filter((article) => !builtInIds.has(article.id));
+        return [...mergedBuiltIns, ...customArticles];
       } catch (e) {
         console.error("Failed to parse saved articles", e);
       }
@@ -182,7 +192,15 @@ export default function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem("lobster_magazine_articles_v2", JSON.stringify(articles));
+    const builtInIds = new Set(initialArticles.map((article) => article.id));
+    const payload = articles.map((article) => {
+      if (builtInIds.has(article.id)) {
+        const { content, ...rest } = article;
+        return rest;
+      }
+      return article;
+    });
+    localStorage.setItem("lobster_magazine_articles_v3", JSON.stringify(payload));
   }, [articles]);
 
   // Current interface states
@@ -248,8 +266,14 @@ export default function App() {
       return;
     }
 
+    if (activeArticle.content?.trim()) {
+      setReaderContent(rewriteArticleImages(activeArticle.content));
+      setReaderContentLoading(false);
+      return;
+    }
+
     if (!activeArticle.sourceUrl) {
-      setReaderContent(activeArticle.content);
+      setReaderContent("<p>暂无正文内容。</p>");
       setReaderContentLoading(false);
       return;
     }
@@ -269,7 +293,7 @@ export default function App() {
       })
       .then((data) => {
         if (!cancelled) {
-          setReaderContent(data.content || "<p>暂无正文内容。</p>");
+          setReaderContent(rewriteArticleImages(data.content || "<p>暂无正文内容。</p>"));
         }
       })
       .catch(() => {
@@ -371,7 +395,7 @@ export default function App() {
       setArticles(initialArticles);
       setLikedArticles([]);
       setBookmarkedArticles([]);
-      localStorage.removeItem("lobster_magazine_articles_v2");
+      localStorage.removeItem("lobster_magazine_articles_v3");
       localStorage.removeItem("lobster_magazine_likes");
       localStorage.removeItem("lobster_magazine_bookmarks");
     }
