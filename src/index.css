@@ -41,10 +41,34 @@
   margin-bottom: 0 !important;
 }
 
-.xiumi-article-content p:empty,
-.xiumi-article-content p:has(> br:only-child) {
+.xiumi-article-content p:empty {
   display: none;
   margin: 0 !important;
+}
+
+/* 段间空行：原稿中的 <p><br></p> 或 <p><span><br></span></p> */
+.xiumi-article-content p:has(> br:only-child),
+.xiumi-article-content p:has(> span:only-child > br:only-child) {
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0;
+  min-height: 0;
+  line-height: 0;
+  font-size: 0;
+  overflow: hidden;
+}
+
+.xiumi-article-content p:has(> br:only-child) + :is(p, h1, h2, h3, h4, h5, h6),
+.xiumi-article-content p:has(> span:only-child > br:only-child) + :is(p, h1, h2, h3, h4, h5, h6) {
+  margin-top: 1.25em !important;
+}
+
+/* 图片后的空行段落仍隐藏 */
+.xiumi-article-content img + p:has(> br:only-child),
+.xiumi-article-content img + p:has(> span:only-child > br:only-child) {
+  display: none !important;
+  min-height: 0;
 }
 
 .xiumi-article-content h1 {
@@ -82,6 +106,22 @@
   margin-bottom: 0.35rem;
 }
 
+/* 图注：紧贴图片，图注与下文之间保留空行 */
+.xiumi-article-content p.figure-caption {
+  margin-top: 0 !important;
+  margin-bottom: 1.25em !important;
+  text-align: center;
+  font-size: 0.85em;
+}
+
+.xiumi-article-content img:has(+ p.figure-caption) {
+  margin-bottom: 0 !important;
+}
+
+.xiumi-article-content p.figure-caption + :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 0 !important;
+}
+
 .xiumi-article-content table {
   width: 100%;
   border-collapse: collapse;
@@ -105,11 +145,51 @@
 
 .xiumi-article-content :is(ul, ol) {
   margin: 0.35em 0 !important;
-  padding-left: 1.5em;
+  padding: 0 !important;
+  list-style-type: none;
+  list-style-position: outside;
+}
+
+.xiumi-article-content ul.xiumi-bullet-list {
+  margin: 0.35em 0 0.35em 1.25em !important;
+  padding: 0 0 0 1.5em !important;
+  list-style-type: disc;
+}
+
+.xiumi-article-content :is(h1, h2, h3, h4, h5, h6) + :is(ul, ol) {
+  margin-left: 0 !important;
+}
+
+.xiumi-article-content :is(h1, h2, h3, h4, h5, h6) + ul.xiumi-bullet-list {
+  margin-left: 1.25em !important;
+}
+
+.xiumi-article-content ul ul,
+.xiumi-article-content ol ol,
+.xiumi-article-content ul ol,
+.xiumi-article-content ol ul {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  list-style-type: none;
+}
+
+.xiumi-article-content ul.xiumi-bullet-list ol {
+  margin: 0.35em 0 0.35em 0.75em !important;
+  padding: 0 0 0 1.25em !important;
+  list-style-type: decimal;
+}
+
+.xiumi-article-content ul.xiumi-bullet-list ul {
+  list-style-type: circle;
 }
 
 .xiumi-article-content li {
   margin: 0.15em 0 !important;
+}
+
+.xiumi-article-content li > p {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
 /* Night mode: override xiumius inline dark text colors */

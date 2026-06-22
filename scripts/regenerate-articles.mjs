@@ -30,6 +30,26 @@ function proxyImageUrl(rawUrl) {
   return `/api/proxy-image?url=${encodeURIComponent(normalizeImageUrl(rawUrl))}`;
 }
 
+function normalizeArticleTypography(html) {
+  let result = html;
+  result = result.replace(
+    /(<img\b[^>]*>)\s*<p[^>]*>\s*<br\s*\/?>\s*<\/p>\s*(?=<p[^>]*text-align:\s*center)/gi,
+    "$1"
+  );
+  result = result.replace(
+    /<p([^>]*)>((?:\s*<(?:span|em|strong|b|i)[^>]*>)*\s*图\s*[\d.])/gi,
+    (match, attrs, contentStart) => {
+      if (!/text-align:\s*center/i.test(attrs)) return match;
+      if (attrs.includes("figure-caption")) return match;
+      const newAttrs = attrs.includes('class="')
+        ? attrs.replace(/class="([^"]*)"/, 'class="$1 figure-caption"')
+        : `${attrs} class="figure-caption"`;
+      return `<p${newAttrs}>${contentStart}`;
+    }
+  );
+  return result;
+}
+
 function rewriteArticleImages(html) {
   let result = html
     .replace(/(\s(?:src|data-src|data-original)=)(["'])(.*?)\2/gi, (_m, prefix, quote, url) => {
@@ -44,6 +64,7 @@ function rewriteArticleImages(html) {
     if (!trimmed || trimmed.startsWith("data:") || trimmed === "initial") return match;
     return `url(${quote}${proxyImageUrl(normalizeImageUrl(trimmed))}${quote})`;
   });
+  return normalizeArticleTypography(result);
 }
 
 function collectRaHtmlBlocks(obj, out = []) {

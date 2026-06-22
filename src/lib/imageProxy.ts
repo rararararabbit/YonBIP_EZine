@@ -34,6 +34,31 @@ export function proxyImageUrl(rawUrl: string): string {
   return `/api/proxy-image?url=${encodeURIComponent(normalized)}`;
 }
 
+export function normalizeArticleTypography(html: string): string {
+  let result = html;
+
+  // 图片与图注之间的空行段落
+  result = result.replace(
+    /(<img\b[^>]*>)\s*<p[^>]*>\s*<br\s*\/?>\s*<\/p>\s*(?=<p[^>]*text-align:\s*center)/gi,
+    "$1"
+  );
+
+  // 标记居中以「图」开头的图注段落
+  result = result.replace(
+    /<p([^>]*)>((?:\s*<(?:span|em|strong|b|i)[^>]*>)*\s*图\s*[\d.])/gi,
+    (match, attrs, contentStart) => {
+      if (!/text-align:\s*center/i.test(attrs)) return match;
+      if (attrs.includes("figure-caption")) return match;
+      const newAttrs = attrs.includes('class="')
+        ? attrs.replace(/class="([^"]*)"/, 'class="$1 figure-caption"')
+        : `${attrs} class="figure-caption"`;
+      return `<p${newAttrs}>${contentStart}`;
+    }
+  );
+
+  return result;
+}
+
 export function rewriteArticleImages(html: string): string {
   let result = html
     .replace(/(\s(?:src|data-src|data-original)=)(["'])(.*?)\2/gi, (_match, prefix: string, quote: string, url: string) => {
@@ -54,7 +79,7 @@ export function rewriteArticleImages(html: string): string {
     return `url(${quote}${proxyImageUrl(normalizeImageUrl(trimmed))}${quote})`;
   });
 
-  return result;
+  return normalizeArticleTypography(result);
 }
 
 export function getProxyReferer(hostname: string): string | undefined {
