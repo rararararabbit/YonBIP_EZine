@@ -632,7 +632,7 @@ export default function App() {
           >
             
             {/* Control Bar */}
-            <div className={`sticky top-0 z-20 flex justify-between items-center p-4 border-b-2 ${
+            <div className={`sticky top-0 z-20 flex flex-col md:flex-row md:justify-between md:items-center gap-3 p-3 md:p-4 border-b-2 ${
               readerTheme === "parchment" 
                 ? "bg-[#faf8f5]/95 border-[#1a1a1a]/10" 
                 : "bg-[#140b0c]/95 border-rose-950/80"
@@ -640,13 +640,13 @@ export default function App() {
               
               <button
                 onClick={() => setActiveArticle(null)}
-                className="flex items-center gap-2 text-xs font-black uppercase tracking-widest px-4 py-2 bg-[#D9432E] text-[#fff5f5] border-2 border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_rgba(26,26,26,1)]"
+                className="flex items-center justify-center gap-2 w-full md:w-auto text-xs font-black uppercase tracking-widest px-4 py-2 bg-[#D9432E] text-[#fff5f5] border-2 border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all cursor-pointer shadow-[2px_2px_0px_rgba(26,26,26,1)]"
               >
                 <X size={13} /> 返回目录
               </button>
 
               {/* Adjustments */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-end gap-3 w-full md:w-auto shrink-0">
                 {/* Font control slider indicator */}
                 <div className={`flex items-center gap-1 text-xs border-2 border-[#1A1A1A] rounded p-0.5 bg-white text-[#1a1a1a]`}>
                   <button 
