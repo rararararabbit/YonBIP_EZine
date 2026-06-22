@@ -35,19 +35,26 @@ export function proxyImageUrl(rawUrl: string): string {
 }
 
 export function rewriteArticleImages(html: string): string {
-  return html
+  let result = html
+    .replace(/(\s(?:src|data-src|data-original)=)(["'])(.*?)\2/gi, (_match, prefix: string, quote: string, url: string) => {
+      const normalized = normalizeImageUrl(url);
+      return `${prefix}${quote}${proxyImageUrl(normalized)}${quote}`;
+    })
     .replace(
       /(<img\b[^>]*?\ssrc=)(["'])(.*?)\2/gi,
       (_match, prefix: string, quote: string, url: string) =>
-        `${prefix}${quote}${proxyImageUrl(url)}${quote}`
-    )
-    .replace(/\burl\((['"]?)(.*?)\1\)/gi, (match, quote: string, url: string) => {
-      const trimmed = url.trim();
-      if (!trimmed || trimmed.startsWith("data:")) {
-        return match;
-      }
-      return `url(${quote}${proxyImageUrl(trimmed)}${quote})`;
-    });
+        `${prefix}${quote}${proxyImageUrl(normalizeImageUrl(url))}${quote}`
+    );
+
+  result = result.replace(/\burl\((['"]?)(.*?)\1\)/gi, (match, quote: string, url: string) => {
+    const trimmed = url.trim();
+    if (!trimmed || trimmed.startsWith("data:") || trimmed === "initial") {
+      return match;
+    }
+    return `url(${quote}${proxyImageUrl(normalizeImageUrl(trimmed))}${quote})`;
+  });
+
+  return result;
 }
 
 export function getProxyReferer(hostname: string): string | undefined {

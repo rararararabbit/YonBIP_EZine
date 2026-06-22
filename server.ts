@@ -337,9 +337,10 @@ function collectRaHtmlBlocks(obj: unknown, out: string[] = []): string[] {
   return out;
 }
 
-function extractCellTextFromRaHtml(html: string): string {
+function extractCellContentFromRaHtml(html: string): string {
   const parts: string[] = [];
-  const regex = /class="tn-cell tn-cell-text[^"]*"[^>]*>([\s\S]*?)<\/div>/g;
+  const regex =
+    /class="tn-cell tn-cell-(?:text|image)[^"]*"[^>]*>([\s\S]*?)<\/div>/g;
   let match: RegExpExecArray | null;
   while ((match = regex.exec(html)) !== null) {
     parts.push(match[1]);
@@ -350,6 +351,7 @@ function extractCellTextFromRaHtml(html: string): string {
 function normalizeArticleHtml(html: string): string {
   return rewriteArticleImages(
     html
+      .replace(/(\s(?:src|data-src|data-original)=["'])\/\//g, '$1https://')
       .replace(/src="\/\//g, 'src="https://')
       .replace(/href="\/\//g, 'href="https://')
   );
@@ -402,7 +404,7 @@ async function fetchXiumiArticleHtml(sourceUrl: string): Promise<string> {
   }
 
   const largestBlock = raHtmlBlocks.sort((a, b) => b.length - a.length)[0];
-  const content = extractCellTextFromRaHtml(largestBlock) || largestBlock;
+  const content = extractCellContentFromRaHtml(largestBlock) || largestBlock;
   return normalizeArticleHtml(content);
 }
 
