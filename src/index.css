@@ -28,17 +28,46 @@
 }
 
 /* Imported xiumius article body inside reader */
+.xiumi-article-content {
+  line-height: 1.75;
+}
+
+.xiumi-article-content p {
+  margin-top: 0.35em !important;
+  margin-bottom: 0.35em !important;
+}
+
+.xiumi-article-content p:empty,
+.xiumi-article-content p:has(> br:only-child) {
+  display: none;
+  margin: 0 !important;
+}
+
+.xiumi-article-content :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 1.1em !important;
+  margin-bottom: 0.45em !important;
+  line-height: 1.35;
+}
+
+.xiumi-article-content :is(h1, h2, h3, h4, h5, h6):first-child {
+  margin-top: 0 !important;
+}
+
 .xiumi-article-content img {
   max-width: 100%;
   height: auto;
-  margin: 1rem auto;
+  margin: 0.65rem auto;
   display: block;
+}
+
+.xiumi-article-content img + img {
+  margin-top: 0.35rem;
 }
 
 .xiumi-article-content table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1rem 0;
+  margin: 0.65rem 0;
   font-size: 0.9em;
 }
 
@@ -53,6 +82,16 @@
   overflow-x: auto;
   background: rgba(26, 26, 26, 0.04);
   border-radius: 0.25rem;
+  margin: 0.5em 0 !important;
+}
+
+.xiumi-article-content :is(ul, ol) {
+  margin: 0.35em 0 !important;
+  padding-left: 1.5em;
+}
+
+.xiumi-article-content li {
+  margin: 0.15em 0 !important;
 }
 
 /* Night mode: override xiumius inline dark text colors */

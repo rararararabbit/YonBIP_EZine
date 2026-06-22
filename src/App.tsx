@@ -7,7 +7,6 @@ import {
   Moon, 
   Bookmark, 
   PenTool, 
-  Calendar, 
   Clock, 
   Heart, 
   RefreshCw, 
@@ -555,12 +554,8 @@ export default function App() {
                         <div className="px-6 pt-6 flex-1 flex flex-col min-h-0">
                           <div className="flex-1">
                             {/* Metadata tags */}
-                            <div className="flex justify-between items-center mb-3 text-[10px] uppercase font-bold text-[#D9432E]">
+                            <div className="mb-3 text-[10px] uppercase font-bold text-[#D9432E]">
                               <span>#{article.category}</span>
-                              <div className="flex items-center gap-1 opacity-70">
-                                <Calendar size={11} />
-                                <span>{article.date}</span>
-                              </div>
                             </div>
 
                             {/* Headline */}
@@ -743,7 +738,7 @@ export default function App() {
 
               {/* Rendered HTML article body */}
               <div 
-                className={`prose max-w-none leading-loose tracking-wide font-medium ${
+                className={`max-w-none tracking-wide font-medium ${
                   readerFontSize === "sm" ? "text-sm" :
                   readerFontSize === "base" ? "text-base" :
                   readerFontSize === "lg" ? "text-lg" : "text-xl"
@@ -756,7 +751,7 @@ export default function App() {
                   </div>
                 ) : (
                   <div
-                    className="space-y-6 xiumi-article-content"
+                    className="xiumi-article-content"
                     dangerouslySetInnerHTML={{ __html: readerContent }}
                   />
                 )}
