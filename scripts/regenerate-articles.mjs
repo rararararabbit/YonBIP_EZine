@@ -59,9 +59,32 @@ function collectRaHtmlBlocks(obj, out = []) {
 
 function extractCellContentFromRaHtml(html) {
   const parts = [];
-  const regex = /class="tn-cell tn-cell-(?:text|image)[^"]*"[^>]*>([\s\S]*?)<\/div>/g;
+  const cellStartRe =
+    /<div\b[^>]*\bclass="[^"]*\btn-cell tn-cell-(?:text|image)\b[^"]*"[^>]*>/g;
   let match;
-  while ((match = regex.exec(html)) !== null) parts.push(match[1]);
+  while ((match = cellStartRe.exec(html)) !== null) {
+    const openEnd = match.index + match[0].length;
+    let depth = 1;
+    let i = openEnd;
+    while (i < html.length && depth > 0) {
+      const nextOpen = html.indexOf("<div", i);
+      const nextClose = html.indexOf("</div>", i);
+      if (nextClose === -1) break;
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        depth += 1;
+        const tagEnd = html.indexOf(">", nextOpen);
+        i = tagEnd === -1 ? nextClose : tagEnd + 1;
+      } else {
+        depth -= 1;
+        if (depth === 0) {
+          parts.push(html.slice(openEnd, nextClose));
+          cellStartRe.lastIndex = nextClose + 6;
+          break;
+        }
+        i = nextClose + 6;
+      }
+    }
+  }
   return parts.join("");
 }
 
