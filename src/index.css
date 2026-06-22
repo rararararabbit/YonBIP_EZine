@@ -37,7 +37,7 @@
   margin-bottom: 0.35em !important;
 }
 
-.xiumi-article-content p:has(+ :is(h2, h3, h4, h5, h6)) {
+.xiumi-article-content p:has(+ :is(h1, h2, h3, h4, h5, h6)) {
   margin-bottom: 0 !important;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .xiumi-article-content h1 {
-  margin-top: 0.35em !important;
+  margin-top: 1.25em !important;
   margin-bottom: 1.25em !important;
   line-height: 1.35;
 }
@@ -72,8 +72,8 @@
   display: block;
 }
 
-/* 图片后紧跟小标题：只保留一处空行 */
-.xiumi-article-content img + :is(h2, h3, h4, h5, h6) {
+/* 图片后紧跟标题：只保留一处空行 */
+.xiumi-article-content img + :is(h1, h2, h3, h4, h5, h6) {
   margin-top: 0 !important;
 }
 
