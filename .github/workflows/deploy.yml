@@ -116,8 +116,8 @@ jobs:
               cp /var/www/YonBIP_EZine/.env .env
             fi
             if pm2 describe YonBIP_EZine-test >/dev/null 2>&1; then
-              PORT=3001 NODE_ENV=production BASE_PATH=/YonBIP_EZine-test/ VITE_BASE_PATH=/YonBIP_EZine-test/ pm2 restart YonBIP_EZine-test --update-env
+              PORT=3003 NODE_ENV=production BASE_PATH=/YonBIP_EZine-test/ VITE_BASE_PATH=/YonBIP_EZine-test/ pm2 restart YonBIP_EZine-test --update-env
             else
-              PORT=3001 NODE_ENV=production BASE_PATH=/YonBIP_EZine-test/ VITE_BASE_PATH=/YonBIP_EZine-test/ pm2 start dist/server.cjs --name YonBIP_EZine-test
+              PORT=3003 NODE_ENV=production BASE_PATH=/YonBIP_EZine-test/ VITE_BASE_PATH=/YonBIP_EZine-test/ pm2 start dist/server.cjs --name YonBIP_EZine-test
             fi
             pm2 save

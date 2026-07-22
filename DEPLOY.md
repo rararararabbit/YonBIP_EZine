@@ -6,7 +6,7 @@
 |---|---|---|
 | URL | http://123.56.7.111/YonBIP_EZine/ | http://123.56.7.111/YonBIP_EZine-test/ |
 | 目录 | `/var/www/YonBIP_EZine` | `/var/www/YonBIP_EZine-test` |
-| 端口 | 现有（通常 3000） | `3001` |
+| 端口 | `3001`（当前 pm2） | `3003`（避开 Yonyou_red_test 的 3002） |
 | PM2 | `YonBIP_EZine` | `YonBIP_EZine-test` |
 | 发版 | 推送 `main` **自动**部署 | GitHub Actions **手动** Run workflow，选 `test` |
 
@@ -38,7 +38,7 @@ mkdir -p /var/www/YonBIP_EZine-test
 
 ```nginx
 location /YonBIP_EZine/ {
-  proxy_pass http://127.0.0.1:3000/;
+  proxy_pass http://127.0.0.1:3001/;
   proxy_http_version 1.1;
   proxy_set_header Host $host;
   proxy_set_header X-Real-IP $remote_addr;
@@ -47,7 +47,7 @@ location /YonBIP_EZine/ {
 }
 
 location /YonBIP_EZine-test/ {
-  proxy_pass http://127.0.0.1:3001/;
+  proxy_pass http://127.0.0.1:3003/;
   proxy_http_version 1.1;
   proxy_set_header Host $host;
   proxy_set_header X-Real-IP $remote_addr;
@@ -75,7 +75,7 @@ nginx -t && systemctl reload nginx
 
 ```bash
 cd /var/www/YonBIP_EZine-test
-PORT=3001 NODE_ENV=production BASE_PATH=/YonBIP_EZine-test/ VITE_BASE_PATH=/YonBIP_EZine-test/ \
+PORT=3003 NODE_ENV=production BASE_PATH=/YonBIP_EZine-test/ VITE_BASE_PATH=/YonBIP_EZine-test/ \
   pm2 start dist/server.cjs --name YonBIP_EZine-test
 pm2 save
 ```
