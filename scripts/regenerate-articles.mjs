@@ -26,8 +26,19 @@ function shouldProxyImageUrl(rawUrl) {
 }
 
 function proxyImageUrl(rawUrl) {
+  const base = (process.env.VITE_BASE_PATH || process.env.BASE_PATH || "/YonBIP_EZine/").replace(
+    /\/?$/,
+    "/"
+  );
+  const trimmed = rawUrl.trim();
+  const existing = trimmed.match(
+    /^(?:https?:\/\/[^/?#]+)?(?:\/YonBIP_EZine(?:-test)?)?\/api\/(proxy-image|proxy-cover)(\?[^#]*)?/i
+  );
+  if (existing) {
+    return `${base}api/${existing[1]}${existing[2] || ""}`;
+  }
   if (!shouldProxyImageUrl(rawUrl)) return rawUrl;
-  return `/api/proxy-image?url=${encodeURIComponent(normalizeImageUrl(rawUrl))}`;
+  return `${base}api/proxy-image?url=${encodeURIComponent(normalizeImageUrl(rawUrl))}`;
 }
 
 function normalizeArticleTypography(html) {

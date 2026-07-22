@@ -26,6 +26,16 @@ export function apiUrl(path: string): string {
   return `${getPublicBaseUrl()}${normalized}`;
 }
 
+/** Rewrite legacy `/api/proxy-*` (and any base-prefixed variant) to current public base. */
+function rewriteExistingProxyPath(rawUrl: string): string | null {
+  const trimmed = rawUrl.trim();
+  const match = trimmed.match(
+    /^(?:https?:\/\/[^/?#]+)?(?:\/YonBIP_EZine(?:-test)?)?\/api\/(proxy-image|proxy-cover)(\?[^#]*)?(?:#.*)?$/i
+  );
+  if (!match) return null;
+  return apiUrl(`api/${match[1]}${match[2] || ""}`);
+}
+
 export function normalizeImageUrl(rawUrl: string): string {
   const trimmed = rawUrl.trim();
   if (trimmed.startsWith("//")) {
@@ -46,6 +56,9 @@ export function shouldProxyImageUrl(rawUrl: string): boolean {
 }
 
 export function proxyImageUrl(rawUrl: string): string {
+  const existing = rewriteExistingProxyPath(rawUrl);
+  if (existing) return existing;
+
   if (!shouldProxyImageUrl(rawUrl)) {
     return rawUrl;
   }
