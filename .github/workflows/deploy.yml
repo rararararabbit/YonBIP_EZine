@@ -2,11 +2,27 @@ name: Deploy YonBIP_EZine
 
 on:
   push:
-    branches: [main, staging]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deploy target
+        required: true
+        type: choice
+        options:
+          - test
+          - prod
+        default: test
+
+concurrency:
+  group: deploy-yonbip-ezine-${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'prod' }}
+  cancel-in-progress: true
 
 jobs:
   deploy-prod:
-    if: github.ref == 'refs/heads/main'
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'prod')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,11 +35,9 @@ jobs:
           cache: npm
 
       - name: Install and build
-        env:
-          VITE_BASE_PATH: /YonBIP_EZine/
         run: |
           npm ci
-          npm run build
+          npm run build:prod
 
       - name: Upload build to server
         uses: appleboy/scp-action@v0.1.7
@@ -53,7 +67,7 @@ jobs:
             pm2 save
 
   deploy-test:
-    if: github.ref == 'refs/heads/staging'
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'test'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -66,11 +80,9 @@ jobs:
           cache: npm
 
       - name: Install and build
-        env:
-          VITE_BASE_PATH: /YonBIP_EZine-test/
         run: |
           npm ci
-          npm run build
+          npm run build:test
 
       - name: Ensure deploy directory exists
         uses: appleboy/ssh-action@v1.2.0

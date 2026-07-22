@@ -1,12 +1,26 @@
 # 同机正式 / 测试双环境部署
 
+只维护 **`main` 一个分支**。服务器上仍是两套目录 / 端口 / PM2 / Nginx path。
+
 | | 正式版 | 测试版 |
 |---|---|---|
 | URL | http://123.56.7.111/YonBIP_EZine/ | http://123.56.7.111/YonBIP_EZine-test/ |
 | 目录 | `/var/www/YonBIP_EZine` | `/var/www/YonBIP_EZine-test` |
 | 端口 | 现有（通常 3000） | `3001` |
 | PM2 | `YonBIP_EZine` | `YonBIP_EZine-test` |
-| 分支 | `main` 自动部署 | `staging` 自动部署 |
+| 发版 | 推送 `main` **自动**部署 | GitHub Actions **手动** Run workflow，选 `test` |
+
+## 日常发版
+
+1. **测一下**：GitHub → Actions → Deploy YonBIP_EZine → Run workflow → environment 选 `test` → 打开 http://123.56.7.111/YonBIP_EZine-test/
+2. **上正式**：把改动推到 `main`（或手动 Run workflow 选 `prod`）→ http://123.56.7.111/YonBIP_EZine/
+
+本地构建：
+
+```bash
+npm run build:prod
+npm run build:test
+```
 
 ## 服务器一次性配置
 
@@ -20,7 +34,7 @@ mkdir -p /var/www/YonBIP_EZine-test
 
 ### 2. Nginx
 
-两套 location 都用带尾斜杠的 `proxy_pass`，把路径前缀剥掉后再转给 Node：
+可直接参考仓库内 [`deploy/nginx-yonbip-ezine.conf`](deploy/nginx-yonbip-ezine.conf)。两套 location 都用带尾斜杠的 `proxy_pass`，把路径前缀剥掉后再转给 Node：
 
 ```nginx
 location /YonBIP_EZine/ {
@@ -53,21 +67,20 @@ location /YonBIP_EZine-test/ {
 nginx -t && systemctl reload nginx
 ```
 
-**上线顺序：** 先改 Nginx（两套 location 剥前缀）→ 再部署带 `BASE_URL` 的前端到 `main`。否则正式版 API 可能 404。
+**上线顺序：** 先改 Nginx（两套 location 剥前缀）→ 再部署带 `BASE_URL` 的前端到正式站。否则正式版 API 可能 404。
 
 ### 3. 测试版 PM2
 
-第一次可由 GitHub Actions（推 `staging`）自动创建；也可手动：
+第一次由 Actions 手动部署 `test` 时会自动创建；也可手动：
 
 ```bash
 cd /var/www/YonBIP_EZine-test
-# 确保已有 dist/（先跑一次 staging 部署或手动上传）
 PORT=3001 NODE_ENV=production BASE_PATH=/YonBIP_EZine-test/ VITE_BASE_PATH=/YonBIP_EZine-test/ \
   pm2 start dist/server.cjs --name YonBIP_EZine-test
 pm2 save
 ```
 
-正式版 PM2 名称与目录不要改。若正式版也需写入 `BASE_PATH`（服务端拼图片代理 URL），重启一次：
+正式版若需写入 `BASE_PATH`（服务端拼图片代理 URL），重启一次：
 
 ```bash
 cd /var/www/YonBIP_EZine
@@ -79,15 +92,3 @@ pm2 save
 ### 4. 环境变量
 
 `GEMINI_API_KEY` 可放在各目录的 `.env`。测试目录若没有，部署脚本会从正式目录复制一份。
-
-## 日常发版
-
-1. 功能合到 `staging` → 自动部署测试站 → 打开 http://123.56.7.111/YonBIP_EZine-test/ 验收  
-2. 验收通过后 merge 到 `main` → 自动部署正式站 → http://123.56.7.111/YonBIP_EZine/
-
-本地按环境构建：
-
-```bash
-VITE_BASE_PATH=/YonBIP_EZine/ npm run build
-VITE_BASE_PATH=/YonBIP_EZine-test/ npm run build
-```

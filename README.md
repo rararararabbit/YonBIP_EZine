@@ -21,7 +21,7 @@ View your app in AI Studio: https://ai.studio/apps/689e9cfa-dc95-4e9a-a2b1-4e58c
 
 ## Deploy (prod + test on same server)
 
-See [DEPLOY.md](DEPLOY.md) for same-host dual-environment setup:
+See [DEPLOY.md](DEPLOY.md). Single branch `main`:
 
-- Prod: `main` → http://123.56.7.111/YonBIP_EZine/
-- Test: `staging` → http://123.56.7.111/YonBIP_EZine-test/
+- Prod: push to `main` (auto) → http://123.56.7.111/YonBIP_EZine/
+- Test: Actions → Run workflow → `test` → http://123.56.7.111/YonBIP_EZine-test/
