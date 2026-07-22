@@ -16,6 +16,27 @@ const app = express();
 app.use(express.json());
 
 const PORT = Number(process.env.PORT) || 3000;
+const PUBLIC_BASE = (
+  process.env.VITE_BASE_PATH ||
+  process.env.BASE_PATH ||
+  "/YonBIP_EZine/"
+).replace(/\/$/, "");
+
+// Local / no-nginx: map /YonBIP_EZine/api/... → /api/... (leave Vite base assets alone).
+// Production behind nginx with proxy_pass .../ already strips the full prefix.
+if (PUBLIC_BASE) {
+  app.use((req, _res, next) => {
+    const apiPrefix = `${PUBLIC_BASE}/api`;
+    if (
+      req.url === apiPrefix ||
+      req.url.startsWith(`${apiPrefix}/`) ||
+      req.url.startsWith(`${apiPrefix}?`)
+    ) {
+      req.url = req.url.slice(PUBLIC_BASE.length) || "/";
+    }
+    next();
+  });
+}
 
 async function proxyImageHandler(req: express.Request, res: express.Response) {
   const rawUrl = typeof req.query.url === "string" ? req.query.url : "";

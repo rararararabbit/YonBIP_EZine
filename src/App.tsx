@@ -281,7 +281,7 @@ export default function App() {
     setReaderContentLoading(true);
     setReaderContent("");
 
-    fetch("/api/fetch-article-content", {
+    fetch(`${import.meta.env.BASE_URL}api/fetch-article-content`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: activeArticle.sourceUrl }),

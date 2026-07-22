@@ -4,8 +4,9 @@ import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
+  const base = process.env.VITE_BASE_PATH || '/YonBIP_EZine/';
   return {
-    base: '/YonBIP_EZine/',
+    base: base.endsWith('/') ? base : `${base}/`,
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

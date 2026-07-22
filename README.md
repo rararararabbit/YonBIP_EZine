@@ -18,3 +18,10 @@ View your app in AI Studio: https://ai.studio/apps/689e9cfa-dc95-4e9a-a2b1-4e58c
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Deploy (prod + test on same server)
+
+See [DEPLOY.md](DEPLOY.md) for same-host dual-environment setup:
+
+- Prod: `main` → http://123.56.7.111/YonBIP_EZine/
+- Test: `staging` → http://123.56.7.111/YonBIP_EZine-test/

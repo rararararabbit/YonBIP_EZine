@@ -7,6 +7,25 @@ const PROXY_HOSTS = new Set([
 
 const PROXY_HOST_SUFFIXES = [".yonyoucloud.com", ".xiumius.cn"];
 
+/** Public URL prefix for API calls (Vite client or Node server). */
+export function getPublicBaseUrl(): string {
+  try {
+    const viteBase = import.meta.env?.BASE_URL;
+    if (typeof viteBase === "string" && viteBase.length > 0) {
+      return viteBase.endsWith("/") ? viteBase : `${viteBase}/`;
+    }
+  } catch {
+    // Node / esbuild bundle may not have Vite-injected import.meta.env
+  }
+  const base = process.env.VITE_BASE_PATH || process.env.BASE_PATH || "/YonBIP_EZine/";
+  return base.endsWith("/") ? base : `${base}/`;
+}
+
+export function apiUrl(path: string): string {
+  const normalized = path.replace(/^\//, "");
+  return `${getPublicBaseUrl()}${normalized}`;
+}
+
 export function normalizeImageUrl(rawUrl: string): string {
   const trimmed = rawUrl.trim();
   if (trimmed.startsWith("//")) {
@@ -31,7 +50,7 @@ export function proxyImageUrl(rawUrl: string): string {
     return rawUrl;
   }
   const normalized = normalizeImageUrl(rawUrl);
-  return `/api/proxy-image?url=${encodeURIComponent(normalized)}`;
+  return apiUrl(`api/proxy-image?url=${encodeURIComponent(normalized)}`);
 }
 
 export function normalizeArticleTypography(html: string): string {
