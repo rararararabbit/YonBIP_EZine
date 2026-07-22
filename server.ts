@@ -22,16 +22,24 @@ const PUBLIC_BASE = (
   "/YonBIP_EZine/"
 ).replace(/\/$/, "");
 
-// Local / no-nginx: map /YonBIP_EZine/api/... → /api/... (leave Vite base assets alone).
-// Production behind nginx with proxy_pass .../ already strips the full prefix.
+/** Register API on both `/api/...` and `/YonBIP_EZine/api/...` (Vite base must not swallow API). */
+function mountApi(
+  method: "get" | "post",
+  routePath: string,
+  handler: express.RequestHandler
+) {
+  app[method](routePath, handler);
+  if (PUBLIC_BASE) {
+    app[method](`${PUBLIC_BASE}${routePath}`, handler);
+  }
+}
+
+// Local / no-nginx: also rewrite req.url so nested routers see /api/...
 if (PUBLIC_BASE) {
   app.use((req, _res, next) => {
+    const pathOnly = req.url.split("?")[0];
     const apiPrefix = `${PUBLIC_BASE}/api`;
-    if (
-      req.url === apiPrefix ||
-      req.url.startsWith(`${apiPrefix}/`) ||
-      req.url.startsWith(`${apiPrefix}?`)
-    ) {
+    if (pathOnly === apiPrefix || pathOnly.startsWith(`${apiPrefix}/`)) {
       req.url = req.url.slice(PUBLIC_BASE.length) || "/";
     }
     next();
@@ -72,8 +80,8 @@ async function proxyImageHandler(req: express.Request, res: express.Response) {
   }
 }
 
-app.get("/api/proxy-image", proxyImageHandler);
-app.get("/api/proxy-cover", proxyImageHandler);
+mountApi("get", "/api/proxy-image", proxyImageHandler);
+mountApi("get", "/api/proxy-cover", proxyImageHandler);
 
 // Initialize GoogleGenAI client lazy-style
 let aiClient: GoogleGenAI | null = null;
@@ -129,7 +137,7 @@ function getLocalFallbackDesign(title: string, category: string) {
 }
 
 // 2. Endpoint: Generate custom SVG image matching the article title and category
-app.post("/api/generate-image", async (req, res) => {
+mountApi("post", "/api/generate-image", async (req, res) => {
   const { title = "无标题文章", category = "其它" } = req.body;
 
   let design = getLocalFallbackDesign(title, category);
@@ -449,7 +457,7 @@ async function fetchXiumiArticleHtml(sourceUrl: string): Promise<string> {
   return normalizeArticleHtml(content);
 }
 
-app.post("/api/fetch-article-content", async (req, res) => {
+mountApi("post", "/api/fetch-article-content", async (req, res) => {
   const { url } = req.body as { url?: string };
   if (!url || typeof url !== "string") {
     return res.status(400).json({ error: "Missing url" });
