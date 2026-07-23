@@ -15,11 +15,35 @@ import {
   Sun,
   ExternalLink
 } from "lucide-react";
-import { Article, ModuleName } from "./types";
-import { initialArticles } from "./data";
+import { Article, ModuleName, PastIssueLink } from "./types";
+import {
+  getPastIssueLinks,
+  issueStorageKey,
+  resolveIssueFromLocation,
+} from "./issues";
 import ArticleCoverImage from "./components/ArticleCoverImage";
 import { rewriteArticleImages } from "./lib/imageProxy";
+import Vol07Magazine from "./vol07/Vol07Magazine";
 
+function loadArticlesForIssue(issueId: string, builtIns: Article[]): Article[] {
+  const saved = localStorage.getItem(issueStorageKey(issueId, "articles"));
+  if (!saved) return builtIns;
+  try {
+    const parsed = JSON.parse(saved) as Article[];
+    const builtInIds = new Set(builtIns.map((article) => article.id));
+    const mergedBuiltIns = builtIns.map((base) => {
+      const savedArticle = parsed.find((article) => article.id === base.id);
+      return savedArticle
+        ? { ...base, ...savedArticle, content: base.content, coverImage: base.coverImage }
+        : base;
+    });
+    const customArticles = parsed.filter((article) => !builtInIds.has(article.id));
+    return [...mergedBuiltIns, ...customArticles];
+  } catch (e) {
+    console.error("Failed to parse saved articles", e);
+    return builtIns;
+  }
+}
 function LobsterWatermark({ className }: { className?: string }) {
   return (
     <svg 
@@ -81,15 +105,13 @@ function LobsterWatermark({ className }: { className?: string }) {
   );
 }
 
-const pastIssueLinks = [
-  {
-    title: "BIP 技术与架构 (5月刊)",
-    desc: "5月刊 · 智启新程",
-    url: "https://design.yonyoucloud.com/static/techzine-index.html",
-  },
-] as { title: string; desc: string; url: string; tag?: string }[];
-
-function PastIssueLinksSection({ className = "" }: { className?: string }) {
+function PastIssueLinksSection({
+  links,
+  className = "",
+}: {
+  links: PastIssueLink[];
+  className?: string;
+}) {
   return (
     <div className={className}>
       <h3 className="text-xs uppercase tracking-[0.2em] font-black text-[#D9432E] mb-4 flex items-center gap-2">
@@ -97,12 +119,16 @@ function PastIssueLinksSection({ className = "" }: { className?: string }) {
         往期友情链接
       </h3>
       <ul className="space-y-3">
-        {pastIssueLinks.map((link, idx) => (
+        {links.map((link, idx) => (
           <li key={idx} className="group">
             <a
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open(link.url, "_blank", "noopener,noreferrer");
+              }}
               className="block p-2.5 border-2 border-transparent bg-[#FDFCF8]/90 hover:bg-[#D9432E]/5 hover:border-[#1A1A1A] transition-all cursor-pointer shadow-[2px_2px_0px_rgba(26,26,26,0.05)] hover:shadow-[3px_3px_0px_rgba(217,67,46,1)]"
             >
               <div className="flex items-center justify-between gap-1">
@@ -126,7 +152,6 @@ function PastIssueLinksSection({ className = "" }: { className?: string }) {
     </div>
   );
 }
-
 function SolidLobsterIcon({ className }: { className?: string }) {
   return (
     <svg 
@@ -168,30 +193,27 @@ function SolidLobsterIcon({ className }: { className?: string }) {
 }
 
 export default function App() {
-  // Articles state with localStorage persistence
-  const [articles, setArticles] = useState<Article[]>(() => {
-    const saved = localStorage.getItem("lobster_magazine_articles_v3");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Article[];
-        const builtInIds = new Set(initialArticles.map((article) => article.id));
-        const mergedBuiltIns = initialArticles.map((base) => {
-          const savedArticle = parsed.find((article) => article.id === base.id);
-          return savedArticle
-            ? { ...base, ...savedArticle, content: base.content, coverImage: base.coverImage }
-            : base;
-        });
-        const customArticles = parsed.filter((article) => !builtInIds.has(article.id));
-        return [...mergedBuiltIns, ...customArticles];
-      } catch (e) {
-        console.error("Failed to parse saved articles", e);
-      }
-    }
-    return initialArticles;
-  });
+  const issue = useMemo(() => resolveIssueFromLocation(), []);
+  const pastIssueLinks = useMemo(() => getPastIssueLinks(issue.id), [issue.id]);
 
   useEffect(() => {
-    const builtInIds = new Set(initialArticles.map((article) => article.id));
+    document.title = `BIP技术与架构(${issue.label})`;
+  }, [issue.label]);
+
+  // 7月刊+ uses 《生态纪》magazine visual system; 6月刊 keeps classic lobster UI.
+  if (issue.theme === "ecosystem" || issue.id === "vol-07") {
+    return <Vol07Magazine issue={issue} pastLinks={pastIssueLinks} />;
+  }
+
+  const builtInArticles = issue.articles;
+
+  // Articles state with localStorage persistence (namespaced per issue)
+  const [articles, setArticles] = useState<Article[]>(() =>
+    loadArticlesForIssue(issue.id, builtInArticles)
+  );
+
+  useEffect(() => {
+    const builtInIds = new Set(builtInArticles.map((article) => article.id));
     const payload = articles.map((article) => {
       if (builtInIds.has(article.id)) {
         const { content, ...rest } = article;
@@ -199,8 +221,8 @@ export default function App() {
       }
       return article;
     });
-    localStorage.setItem("lobster_magazine_articles_v3", JSON.stringify(payload));
-  }, [articles]);
+    localStorage.setItem(issueStorageKey(issue.id, "articles"), JSON.stringify(payload));
+  }, [articles, builtInArticles, issue.id]);
 
   // Current interface states
   const [currentModule, setCurrentModule] = useState<ModuleName | "全部">("全部");
@@ -221,21 +243,24 @@ export default function App() {
 
   // Interaction likes and bookmarks states with local storage
   const [likedArticles, setLikedArticles] = useState<string[]>(() => {
-    const saved = localStorage.getItem("lobster_magazine_likes");
+    const saved = localStorage.getItem(issueStorageKey(issue.id, "likes"));
     return saved ? JSON.parse(saved) : [];
   });
   const [bookmarkedArticles, setBookmarkedArticles] = useState<string[]>(() => {
-    const saved = localStorage.getItem("lobster_magazine_bookmarks");
+    const saved = localStorage.getItem(issueStorageKey(issue.id, "bookmarks"));
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem("lobster_magazine_likes", JSON.stringify(likedArticles));
-  }, [likedArticles]);
+    localStorage.setItem(issueStorageKey(issue.id, "likes"), JSON.stringify(likedArticles));
+  }, [likedArticles, issue.id]);
 
   useEffect(() => {
-    localStorage.setItem("lobster_magazine_bookmarks", JSON.stringify(bookmarkedArticles));
-  }, [bookmarkedArticles]);
+    localStorage.setItem(
+      issueStorageKey(issue.id, "bookmarks"),
+      JSON.stringify(bookmarkedArticles)
+    );
+  }, [bookmarkedArticles, issue.id]);
 
   // Form states for adding new articles
   const [newTitle, setNewTitle] = useState("");
@@ -391,12 +416,12 @@ export default function App() {
   // Reset default catalog data
   const handleResetCatalog = () => {
     if (confirm("是否恢复出厂设置？这将重置内置文章和您的自定义稿件。")) {
-      setArticles(initialArticles);
+      setArticles(builtInArticles);
       setLikedArticles([]);
       setBookmarkedArticles([]);
-      localStorage.removeItem("lobster_magazine_articles_v3");
-      localStorage.removeItem("lobster_magazine_likes");
-      localStorage.removeItem("lobster_magazine_bookmarks");
+      localStorage.removeItem(issueStorageKey(issue.id, "articles"));
+      localStorage.removeItem(issueStorageKey(issue.id, "likes"));
+      localStorage.removeItem(issueStorageKey(issue.id, "bookmarks"));
     }
   };
 
@@ -418,18 +443,18 @@ export default function App() {
           <div className="my-auto text-center flex flex-col items-center z-10 max-w-2xl mx-auto py-12">
             {/* Display Big Bold Typography Headers */}
             <h1 className="font-sans text-4xl sm:text-6xl font-black tracking-tight text-[#1A1A1A] mb-4 leading-tight">
-              BIP 技术与架构 (6月刊)
+              {issue.title}
             </h1>
             
             <p className="font-serif text-[#D9432E] text-xs sm:text-sm tracking-[0.1em] font-extrabold mb-6">
-              主编：BIP 技术与产品中心 · 总体设计部
+              {issue.editor}
             </p>
             
             <div className="h-2 w-32 bg-[#D9432E] my-3"></div>
             
             {/* Issue Description */}
             <p className="text-sm text-[#1A1A1A]/80 font-sans tracking-wide leading-relaxed max-w-lg mt-4 px-4 font-medium">
-              “融合高负载系统架构、AI智能天空与技术生活茶馆之美。在这里，技术广度与极客深度如摩天架构筑基般历久弥新。”
+              {issue.tagline}
             </p>
           </div>
 
@@ -463,14 +488,14 @@ export default function App() {
           <header className="relative flex flex-col md:flex-row justify-between items-center py-4 border-b-2 border-[#D9432E] mb-8 gap-4 bg-[#FDFCF8]/90 backdrop-blur-sm w-full z-10">
             <div className="flex flex-col items-center md:items-start gap-1 cursor-pointer" onClick={() => setIsCoverPage(true)}>
               <span className="text-3xl md:text-4xl font-black tracking-tight text-[#D9432E] hover:opacity-90">
-                BIP 技术与架构 (6月刊)
+                {issue.title}
               </span>
-              <span className="text-[10px] uppercase tracking-widest font-bold opacity-40 ml-0 md:ml-2">BIP Technology & Architecture Journal</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold opacity-40 ml-0 md:ml-2">{issue.subtitle}</span>
             </div>
             
             <div className="text-center md:text-right">
               <span className="text-xs font-bold text-[#1A1A1A] bg-[#D9432E]/5 border-2 border-[#1A1A1A] px-4 py-2 block italic shadow-[2px_2px_0px_rgba(26,26,26,1)]">
-                主编：BIP 技术与产品中心 · 总体设计部
+                {issue.editor}
               </span>
             </div>
           </header>
@@ -511,7 +536,7 @@ export default function App() {
               </div>
 
               {/* Previous Issues & Links — desktop sidebar only */}
-              <PastIssueLinksSection className="hidden lg:block border-t border-[#D9432E]/20 pt-6 mt-2" />
+              <PastIssueLinksSection links={pastIssueLinks} className="hidden lg:block border-t border-[#D9432E]/20 pt-6 mt-2" />
 
             </aside>
 
@@ -600,7 +625,7 @@ export default function App() {
           </main>
 
           {/* Previous Issues & Links — mobile/tablet bottom placement */}
-          <PastIssueLinksSection className="lg:hidden border-t border-[#D9432E]/20 pt-6 mt-8 mb-2" />
+          <PastIssueLinksSection links={pastIssueLinks} className="lg:hidden border-t border-[#D9432E]/20 pt-6 mt-8 mb-2" />
 
           {/* Footer Bar exactly matching Design HTML */}
           <footer className="mt-8 border-t-2 border-[#D9432E] pt-4 pb-2 flex flex-col sm:flex-row justify-between items-center gap-4">

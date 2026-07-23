@@ -25,3 +25,9 @@ See [DEPLOY.md](DEPLOY.md). Single branch `main`:
 
 - Prod: push to `main` (auto) → http://123.56.7.111/YonBIP_EZine/
 - Test: Actions → Run workflow → `test` → http://123.56.7.111/YonBIP_EZine-test/
+
+## Issues (月刊数据)
+
+- 当前默认：**7月刊** → [`src/issues/vol-07/`](src/issues/vol-07/)
+- 已归档固定数据：**6月刊** → [`src/issues/vol-06/`](src/issues/vol-06/)（勿与 7 月刊混改）
+- 回看 6 月刊：`?issue=vol-06`（往期友情链接也会带上）

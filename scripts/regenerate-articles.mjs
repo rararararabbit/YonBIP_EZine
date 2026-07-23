@@ -169,7 +169,7 @@ const report = [];
 for (const [id, url] of articles) {
   process.stderr.write(`Fetching ${id}...\n`);
   const content = await fetchXiumiArticleHtml(url);
-  writeFileSync(`./src/article-contents/${id}.html`, content, "utf8");
+  writeFileSync(`./src/issues/vol-06/article-contents/${id}.html`, content, "utf8");
   const imgs = (content.match(/<img\b/gi) || []).length;
   const proxied = (content.match(/\/api\/proxy-image/g) || []).length;
   report.push({ id, chars: content.length, imgs, proxied });
