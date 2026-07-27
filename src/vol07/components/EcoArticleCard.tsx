@@ -79,7 +79,7 @@ export function EcoArticleCard(props: CardProps): ReactElement {
                 title="跳转到原链接"
                 aria-label="跳转到原链接"
                 onClick={(e) => e.stopPropagation()}
-                className="shrink-0 p-2.5 rounded-xl border border-[#d1d5d1] bg-transparent text-[#222524] hover:border-[#4e5d53] hover:text-[#4e5d53] transition-all duration-200"
+                className="shrink-0 p-2.5 rounded-xl border border-[#d1d5d1] bg-transparent text-[#9aa19c] hover:border-[#4e5d53] hover:text-[#4e5d53] transition-all duration-200"
               >
                 <ExternalLink className="w-4 h-4" />
               </a>
