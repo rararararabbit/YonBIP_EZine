@@ -76,7 +76,7 @@ export default function Vol07Magazine({ issue, pastLinks }: Vol07MagazineProps) 
                     <span className="w-2.5 h-2.5 rounded-full" />
                     <span className="text-base sm:text-lg font-serif font-bold leading-normal">
                       {selectedModule === "all"
-                        ? "特刊全部精彩内容"
+                        ? "本刊全部精彩内容"
                         : selectedModule === "architecture"
                           ? "架构殿堂 专栏文章"
                           : selectedModule === "ai_sky"
@@ -107,7 +107,7 @@ export default function Vol07Magazine({ issue, pastLinks }: Vol07MagazineProps) 
                   <span className="w-2.5 h-2.5 rounded-full bg-[#4e5d53] animate-pulse" />
                   <h2 className="text-base sm:text-lg font-serif font-bold text-[#222524]">
                     {selectedModule === "all"
-                      ? "特刊全部精彩内容"
+                      ? "本刊全部精彩内容"
                       : selectedModule === "architecture"
                         ? "架构殿堂 专栏文章"
                         : selectedModule === "ai_sky"
