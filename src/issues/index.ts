@@ -34,7 +34,7 @@ export function getPastIssueLinks(currentIssueId: string): PastIssueLink[] {
   if (currentIssueId !== vol06Issue.id) {
     links.push({
       title: "BIP 技术与架构 (6月刊)",
-      desc: "6月刊 · 架构殿堂 / AI天空 / 技术茶馆",
+      desc: "6月刊 · Skill串起天、地、人",
       url: `${base}?issue=${vol06Issue.id}`,
     });
   }
