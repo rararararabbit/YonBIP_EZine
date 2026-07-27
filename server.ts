@@ -8,6 +8,7 @@ import {
   normalizeImageUrl,
   rewriteArticleImages,
   shouldProxyImageUrl,
+  unwrapOriginalImageUrl,
 } from "./src/lib/imageProxy.ts";
 
 dotenv.config();
@@ -52,7 +53,7 @@ async function proxyImageHandler(req: express.Request, res: express.Response) {
     return res.status(400).json({ error: "Invalid image url" });
   }
 
-  const normalizedUrl = normalizeImageUrl(rawUrl);
+  const normalizedUrl = unwrapOriginalImageUrl(normalizeImageUrl(rawUrl));
 
   try {
     const parsed = new URL(normalizedUrl);

@@ -26,22 +26,60 @@ export function apiUrl(path: string): string {
   return `${getPublicBaseUrl()}${normalized}`;
 }
 
-/** Rewrite legacy `/api/proxy-*` (and any base-prefixed variant) to current public base. */
-function rewriteExistingProxyPath(rawUrl: string): string | null {
-  const trimmed = rawUrl.trim();
-  const match = trimmed.match(
-    /^(?:https?:\/\/[^/?#]+)?(?:\/YonBIP_EZine(?:-test)?)?\/api\/(proxy-image|proxy-cover)(\?[^#]*)?(?:#.*)?$/i
-  );
-  if (!match) return null;
-  return apiUrl(`api/${match[1]}${match[2] || ""}`);
-}
-
 export function normalizeImageUrl(rawUrl: string): string {
   const trimmed = rawUrl.trim();
   if (trimmed.startsWith("//")) {
     return `https:${trimmed}`;
   }
   return trimmed;
+}
+
+/** Strip Xiumi/OSS compression query (e.g. ?x-oss-process=style/xmwebp) to fetch originals. */
+export function unwrapOriginalImageUrl(rawUrl: string): string {
+  const normalized = normalizeImageUrl(rawUrl);
+  try {
+    const parsed = new URL(normalized);
+    const isXiumiHost =
+      parsed.hostname === "img.xiumi.us" ||
+      parsed.hostname.endsWith(".xiumius.cn") ||
+      parsed.hostname === "xiumius.cn";
+    const hasOssProcess =
+      parsed.searchParams.has("x-oss-process") ||
+      /(?:^|[?&])x-oss-process=/i.test(parsed.search);
+
+    if (!isXiumiHost && !hasOssProcess) {
+      return normalized;
+    }
+
+    parsed.search = "";
+    parsed.hash = "";
+    return parsed.toString();
+  } catch {
+    const noHash = normalized.split("#")[0];
+    const qIndex = noHash.indexOf("?");
+    if (qIndex === -1) return noHash;
+    const base = noHash.slice(0, qIndex);
+    const query = noHash.slice(qIndex + 1);
+    if (!/x-oss-process=/i.test(query) && !/img\.xiumi\.us|xiumius\.cn/i.test(base)) {
+      return noHash;
+    }
+    return base;
+  }
+}
+
+function extractImageUrl(rawUrl: string): string {
+  const trimmed = rawUrl.trim();
+  const proxyMatch = trimmed.match(
+    /^(?:https?:\/\/[^/?#]+)?(?:\/YonBIP_EZine(?:-test)?)?\/api\/(?:proxy-image|proxy-cover)\?url=([^&#]+)/i
+  );
+  if (proxyMatch) {
+    try {
+      return unwrapOriginalImageUrl(decodeURIComponent(proxyMatch[1]));
+    } catch {
+      return unwrapOriginalImageUrl(proxyMatch[1]);
+    }
+  }
+  return unwrapOriginalImageUrl(trimmed);
 }
 
 export function shouldProxyImageUrl(rawUrl: string): boolean {
@@ -56,14 +94,13 @@ export function shouldProxyImageUrl(rawUrl: string): boolean {
 }
 
 export function proxyImageUrl(rawUrl: string): string {
-  const existing = rewriteExistingProxyPath(rawUrl);
-  if (existing) return existing;
+  const imageUrl = extractImageUrl(rawUrl);
 
-  if (!shouldProxyImageUrl(rawUrl)) {
-    return rawUrl;
+  if (!shouldProxyImageUrl(imageUrl)) {
+    return imageUrl;
   }
-  const normalized = normalizeImageUrl(rawUrl);
-  return apiUrl(`api/proxy-image?url=${encodeURIComponent(normalized)}`);
+
+  return apiUrl(`api/proxy-image?url=${encodeURIComponent(imageUrl)}`);
 }
 
 export function normalizeArticleTypography(html: string): string {
@@ -94,13 +131,12 @@ export function normalizeArticleTypography(html: string): string {
 export function rewriteArticleImages(html: string): string {
   let result = html
     .replace(/(\s(?:src|data-src|data-original)=)(["'])(.*?)\2/gi, (_match, prefix: string, quote: string, url: string) => {
-      const normalized = normalizeImageUrl(url);
-      return `${prefix}${quote}${proxyImageUrl(normalized)}${quote}`;
+      return `${prefix}${quote}${proxyImageUrl(url)}${quote}`;
     })
     .replace(
       /(<img\b[^>]*?\ssrc=)(["'])(.*?)\2/gi,
       (_match, prefix: string, quote: string, url: string) =>
-        `${prefix}${quote}${proxyImageUrl(normalizeImageUrl(url))}${quote}`
+        `${prefix}${quote}${proxyImageUrl(url)}${quote}`
     );
 
   result = result.replace(/\burl\((['"]?)(.*?)\1\)/gi, (match, quote: string, url: string) => {
@@ -108,7 +144,7 @@ export function rewriteArticleImages(html: string): string {
     if (!trimmed || trimmed.startsWith("data:") || trimmed === "initial") {
       return match;
     }
-    return `url(${quote}${proxyImageUrl(normalizeImageUrl(trimmed))}${quote})`;
+    return `url(${quote}${proxyImageUrl(trimmed)}${quote})`;
   });
 
   return normalizeArticleTypography(result);

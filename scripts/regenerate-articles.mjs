@@ -14,6 +14,49 @@ function normalizeImageUrl(rawUrl) {
   return trimmed;
 }
 
+function unwrapOriginalImageUrl(rawUrl) {
+  const normalized = normalizeImageUrl(rawUrl);
+  try {
+    const parsed = new URL(normalized);
+    const isXiumiHost =
+      parsed.hostname === "img.xiumi.us" ||
+      parsed.hostname.endsWith(".xiumius.cn") ||
+      parsed.hostname === "xiumius.cn";
+    const hasOssProcess =
+      parsed.searchParams.has("x-oss-process") ||
+      /(?:^|[?&])x-oss-process=/i.test(parsed.search);
+    if (!isXiumiHost && !hasOssProcess) return normalized;
+    parsed.search = "";
+    parsed.hash = "";
+    return parsed.toString();
+  } catch {
+    const noHash = normalized.split("#")[0];
+    const qIndex = noHash.indexOf("?");
+    if (qIndex === -1) return noHash;
+    const base = noHash.slice(0, qIndex);
+    const query = noHash.slice(qIndex + 1);
+    if (!/x-oss-process=/i.test(query) && !/img\.xiumi\.us|xiumius\.cn/i.test(base)) {
+      return noHash;
+    }
+    return base;
+  }
+}
+
+function extractImageUrl(rawUrl) {
+  const trimmed = rawUrl.trim();
+  const proxyMatch = trimmed.match(
+    /^(?:https?:\/\/[^/?#]+)?(?:\/YonBIP_EZine(?:-test)?)?\/api\/(?:proxy-image|proxy-cover)\?url=([^&#]+)/i
+  );
+  if (proxyMatch) {
+    try {
+      return unwrapOriginalImageUrl(decodeURIComponent(proxyMatch[1]));
+    } catch {
+      return unwrapOriginalImageUrl(proxyMatch[1]);
+    }
+  }
+  return unwrapOriginalImageUrl(trimmed);
+}
+
 function shouldProxyImageUrl(rawUrl) {
   try {
     const parsed = new URL(normalizeImageUrl(rawUrl));
@@ -26,19 +69,13 @@ function shouldProxyImageUrl(rawUrl) {
 }
 
 function proxyImageUrl(rawUrl) {
+  const imageUrl = extractImageUrl(rawUrl);
+  if (!shouldProxyImageUrl(imageUrl)) return imageUrl;
   const base = (process.env.VITE_BASE_PATH || process.env.BASE_PATH || "/YonBIP_EZine/").replace(
     /\/?$/,
     "/"
   );
-  const trimmed = rawUrl.trim();
-  const existing = trimmed.match(
-    /^(?:https?:\/\/[^/?#]+)?(?:\/YonBIP_EZine(?:-test)?)?\/api\/(proxy-image|proxy-cover)(\?[^#]*)?/i
-  );
-  if (existing) {
-    return `${base}api/${existing[1]}${existing[2] || ""}`;
-  }
-  if (!shouldProxyImageUrl(rawUrl)) return rawUrl;
-  return `${base}api/proxy-image?url=${encodeURIComponent(normalizeImageUrl(rawUrl))}`;
+  return `${base}api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
 }
 
 function normalizeArticleTypography(html) {
@@ -64,16 +101,16 @@ function normalizeArticleTypography(html) {
 function rewriteArticleImages(html) {
   let result = html
     .replace(/(\s(?:src|data-src|data-original)=)(["'])(.*?)\2/gi, (_m, prefix, quote, url) => {
-      return `${prefix}${quote}${proxyImageUrl(normalizeImageUrl(url))}${quote}`;
+      return `${prefix}${quote}${proxyImageUrl(url)}${quote}`;
     })
     .replace(/(<img\b[^>]*?\ssrc=)(["'])(.*?)\2/gi, (_m, prefix, quote, url) => {
-      return `${prefix}${quote}${proxyImageUrl(normalizeImageUrl(url))}${quote}`;
+      return `${prefix}${quote}${proxyImageUrl(url)}${quote}`;
     });
 
   return result.replace(/\burl\((['"]?)(.*?)\1\)/gi, (match, quote, url) => {
     const trimmed = url.trim();
     if (!trimmed || trimmed.startsWith("data:") || trimmed === "initial") return match;
-    return `url(${quote}${proxyImageUrl(normalizeImageUrl(trimmed))}${quote})`;
+    return `url(${quote}${proxyImageUrl(trimmed)}${quote})`;
   });
   return normalizeArticleTypography(result);
 }
