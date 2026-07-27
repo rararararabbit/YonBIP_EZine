@@ -61,7 +61,7 @@ export function MagazineCoverSplash({
           className="group relative px-10 py-4 bg-[#4e5d53] text-white rounded-xl font-bold tracking-widest text-xs hover:bg-[#3d4b42] transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-xs border border-[#3d4b42] cursor-pointer"
         >
           <span className="flex items-center gap-3">
-            翻开本期特刊 ENTER MAGAZINE
+            翻开本期特刊
             <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </span>
         </button>
