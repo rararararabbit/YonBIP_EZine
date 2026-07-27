@@ -143,11 +143,20 @@
   margin: 0.5em 0 !important;
 }
 
+/* Restore list markers (Xiumi lists rely on browser bullets/numbers).
+   Inline style="list-style-type: none" still wins for Wingdings/custom markers. */
 .xiumi-article-content :is(ul, ol) {
   margin: 0.35em 0 !important;
-  padding: 0 !important;
-  list-style-type: none;
+  padding: 0 0 0 1.5em !important;
   list-style-position: outside;
+}
+
+.xiumi-article-content ul {
+  list-style-type: disc;
+}
+
+.xiumi-article-content ol {
+  list-style-type: decimal;
 }
 
 .xiumi-article-content ul.xiumi-bullet-list {
@@ -168,9 +177,16 @@
 .xiumi-article-content ol ol,
 .xiumi-article-content ul ol,
 .xiumi-article-content ol ul {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  list-style-type: none;
+  margin: 0.15em 0 !important;
+  padding-left: 1.25em !important;
+}
+
+.xiumi-article-content ul ul {
+  list-style-type: circle;
+}
+
+.xiumi-article-content ol ol {
+  list-style-type: lower-alpha;
 }
 
 .xiumi-article-content ul.xiumi-bullet-list ol {
@@ -185,6 +201,7 @@
 
 .xiumi-article-content li {
   margin: 0.15em 0 !important;
+  display: list-item;
 }
 
 .xiumi-article-content li > p {

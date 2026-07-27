@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { ArrowRight, Tag, Clock, Image as ImageIcon } from "lucide-react";
+import { ArrowRight, ExternalLink, Tag, Clock, Image as ImageIcon } from "lucide-react";
 import type { EcoArticleView } from "../ecoTypes";
 import { proxyImageUrl } from "../../lib/imageProxy";
 
@@ -62,14 +62,29 @@ export function EcoArticleCard(props: CardProps): ReactElement {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onReadArticle(article)}
-            className="w-full py-2.5 px-4 bg-[#eae8e3] hover:bg-[#4e5d53] text-[#222524] hover:text-white font-bold text-xs rounded-xl border border-[#d1d5d1] hover:border-[#3d4b42] transition-all duration-200 flex items-center justify-center space-x-2 shadow-xs group/btn"
-          >
-            <span>查看全文</span>
-            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onReadArticle(article)}
+              className="flex-1 min-w-0 py-2.5 px-4 bg-[#eae8e3] hover:bg-[#4e5d53] text-[#222524] hover:text-white font-bold text-xs rounded-xl border border-[#d1d5d1] hover:border-[#3d4b42] transition-all duration-200 flex items-center justify-center space-x-2 shadow-xs group/btn"
+            >
+              <span>查看全文</span>
+              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+            </button>
+            {article.sourceUrl && (
+              <a
+                href={article.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="跳转到原链接"
+                aria-label="跳转到原链接"
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0 p-2.5 rounded-xl border border-[#d1d5d1] bg-transparent text-[#222524] hover:border-[#4e5d53] hover:text-[#4e5d53] transition-all duration-200"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </article>

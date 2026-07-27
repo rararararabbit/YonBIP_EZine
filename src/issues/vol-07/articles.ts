@@ -7,6 +7,8 @@ import content05 from "./article-contents/article-05.html?raw";
 import content06 from "./article-contents/article-06.html?raw";
 import content07 from "./article-contents/article-07.html?raw";
 import content08 from "./article-contents/article-08.html?raw";
+import content09 from "./article-contents/article-09.html?raw";
+import content10 from "./article-contents/article-10.html?raw";
 
 /** July 2026 issue catalog — from Excel 副本BIP技术与架构（7月刊）文章信息. */
 export const vol07Articles: Article[] = [
@@ -121,5 +123,35 @@ export const vol07Articles: Article[] = [
     coverImage:
       "https://c2.yonyoucloud.com/yonbip-ec-link/iuap_file/yonbip-ec-minor/qyic8c7o/2f78956a-06ca-44f3-ac16-b3c34f46364f/6a5f3ae49a28cf57817fd360.jpg",
     sourceUrl: "https://b.xiumius.cn/board/v5/3x9y0/715126561",
+  },
+  {
+    id: "article-09",
+    title: "企业知识运营的新探索",
+    category: "品茗论道",
+    module: "技术茶馆",
+    date: "2026-07",
+    readTime: "8 分钟",
+    intro:
+      '本文以 AI 贯穿企业知识运营全链路（SKILL、KB/KG、AGENT、AI期刊化），构建"知识生成→管控→问答→运营"四环方案，已在企业技术与企业党建场景落地，可推广至各行业',
+    content: content09,
+    coverImage:
+      "https://c2.yonyoucloud.com/yonbip-ec-link/iuap_file/yonbip-ec-minor/qyic8c7o/8ce0fda7-83c9-45a5-98f3-3d10c6e9fa88/6a66b30fabe59010a6d82738.jpg",
+    sourceUrl: "https://v.xiumius.cn/board/v5/3x9y0/716689890",
+  },
+  {
+    id: "article-10",
+    title: "YonCode—企业级AICoding平台",
+    category: "精品课程",
+    module: "技术茶馆",
+    date: "2026-07",
+    readTime: "6 分钟",
+    intro:
+      'YonCode平台，以"应用场景+IDE/CLI+Harness+能力层+模型层"五层架构为核心，融合Skills/Tools/MCP三大能力与五大专业SubAgent，覆盖需求→架构→开发→部署全流程，输出可控、可复用的企业级AI资产。欢迎回看AI Coding专家郭永峰的分享',
+    content: content10,
+    coverImage:
+      "https://c2.yonyoucloud.com/yonbip-ec-link/iuap_file/yonbip-ec-minor/qyic8c7o/b63f48ae-65aa-4504-9b9d-4d6932ac7ce0/6a5f3ac5a1c7b30d6eb58761.jpg",
+    sourceUrl: "https://r.xiumius.cn/board/v5/3x9y0/715200759",
+    videoUrl:
+      "https://aiqa.yonyoucloud.com/techzine/7.16%E7%A7%80%E4%BA%A7%E5%93%81-%E4%BC%81%E4%B8%9A%E7%BA%A7AICoding%E5%B9%B3%E5%8F%B0-1-YonCode%E4%BB%8B%E7%BB%8D-%E9%83%AD%E6%B0%B8%E5%B3%B0.mp4",
   },
 ];

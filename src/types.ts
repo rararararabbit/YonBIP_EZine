@@ -7,6 +7,7 @@ export interface Article {
   content: string;
   coverImage?: string;
   sourceUrl?: string;
+  videoUrl?: string;
   date: string;
   readTime: string;
 }

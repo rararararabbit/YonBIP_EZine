@@ -24,6 +24,7 @@ export interface EcoArticleView {
   date: string;
   readTime: string;
   sourceUrl?: string;
+  videoUrl?: string;
   htmlContent: string;
   featured?: boolean;
 }
@@ -50,6 +51,7 @@ export function toEcoArticle(article: Article, featured = false): EcoArticleView
     date: article.date,
     readTime: article.readTime,
     sourceUrl: article.sourceUrl,
+    videoUrl: article.videoUrl,
     htmlContent: article.content || "",
     featured,
   };
@@ -84,5 +86,6 @@ export const COLUMN_TAG_PRESETS = [
   { id: "前沿动态", name: "前沿动态" },
   { id: "架构师访谈", name: "架构师访谈" },
   { id: "品茗论道", name: "品茗论道" },
+  { id: "精品课程", name: "精品课程" },
   { id: "创新脉动", name: "创新脉动" },
 ];

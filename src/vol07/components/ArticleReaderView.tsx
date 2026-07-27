@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Clock, Tag, Moon, Sun } from "lucide-react";
+import { ArrowLeft, Clock, Tag, Moon, Sun } from "lucide-react";
 import type { EcoArticleView } from "../ecoTypes";
 import { rewriteArticleImages } from "../../lib/imageProxy";
 
@@ -81,16 +81,19 @@ export function ArticleReaderView({ article, onBack }: ArticleReaderViewProps) {
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4e5d53] hover:text-[#222524] shrink-0"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4e5d53] shrink-0 px-3 py-1.5 rounded-lg border border-transparent hover:bg-[#4e5d53] hover:text-white hover:border-[#3d4b42] hover:shadow-xs transition-all duration-200"
           >
             <ArrowLeft className="w-4 h-4" /> 返回目录
           </button>
 
           <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-bold text-[#4e5d53] shrink-0 whitespace-nowrap">
+              文本字号
+            </span>
             <div
               className="inline-flex items-center rounded-lg border border-[#d1d5d1] bg-white p-0.5 shadow-xs"
               role="group"
-              aria-label="字号"
+              aria-label="文本字号"
             >
               {FONT_SIZES.map((opt) => {
                 const active = fontSize === opt.id;
@@ -140,18 +143,20 @@ export function ArticleReaderView({ article, onBack }: ArticleReaderViewProps) {
           </h1>
           <p className="text-sm text-[#6e7370] leading-relaxed">{article.excerpt}</p>
 
-          {article.sourceUrl && (
-            <a
-              href={article.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#4e5d53] hover:underline"
-            >
-              跳转到原链接 <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          )}
-
-          <div className="border-t border-[#d8dbd7] pt-6">
+          <div className="border-t border-[#d8dbd7] pt-6 space-y-6">
+            {article.videoUrl && (
+              <div className="w-full overflow-hidden rounded-xl border border-[#d8dbd7] bg-black shadow-xs">
+                <video
+                  className="w-full aspect-video max-h-[70vh] bg-black"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  src={article.videoUrl}
+                >
+                  您的浏览器不支持视频播放。
+                </video>
+              </div>
+            )}
             {loading ? (
               <p className="text-sm text-[#6e7370]">正文加载中…</p>
             ) : (
