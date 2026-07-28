@@ -103,27 +103,49 @@ export function proxyImageUrl(rawUrl: string): string {
   return apiUrl(`api/proxy-image?url=${encodeURIComponent(imageUrl)}`);
 }
 
+function plainParagraphText(innerHtml: string): string {
+  return innerHtml
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function withFigureCaptionAttrs(attrs: string): string {
+  let next = attrs;
+  if (!/text-align:\s*center/i.test(next)) {
+    next = /style\s*=\s*"/i.test(next)
+      ? next.replace(/style\s*=\s*"/i, 'style="text-align: center; ')
+      : `${next} style="text-align: center;"`;
+  }
+  if (!/\bfigure-caption\b/.test(next)) {
+    next = /\bclass\s*=\s*"/i.test(next)
+      ? next.replace(/\bclass\s*=\s*"/i, 'class="figure-caption ')
+      : `${next} class="figure-caption"`;
+  }
+  return next;
+}
+
 export function normalizeArticleTypography(html: string): string {
   let result = html;
 
   // 图片与图注之间的空行段落
   result = result.replace(
-    /(<img\b[^>]*>)\s*<p[^>]*>\s*<br\s*\/?>\s*<\/p>\s*(?=<p[^>]*text-align:\s*center)/gi,
+    /(<img\b[^>]*>)\s*<p[^>]*>\s*<br\s*\/?>\s*<\/p>\s*(?=<p\b)/gi,
     "$1"
   );
 
-  // 标记居中以「图」开头的图注段落
-  result = result.replace(
-    /<p([^>]*)>((?:\s*<(?:span|em|strong|b|i)[^>]*>)*\s*图\s*[\d.])/gi,
-    (match, attrs, contentStart) => {
-      if (!/text-align:\s*center/i.test(attrs)) return match;
-      if (attrs.includes("figure-caption")) return match;
-      const newAttrs = attrs.includes('class="')
-        ? attrs.replace(/class="([^"]*)"/, 'class="$1 figure-caption"')
-        : `${attrs} class="figure-caption"`;
-      return `<p${newAttrs}>${contentStart}`;
+  // 标记「▲ …」与居中「图 N」图注：强制居中并统一 figure-caption 样式
+  result = result.replace(/<p([^>]*)>((?:(?!<\/p>)[\s\S])*?)<\/p>/gi, (match, attrs: string, inner: string) => {
+    const plain = plainParagraphText(inner);
+    const isTriangleCaption = /^▲/.test(plain);
+    const isNumberedCaption = /^图\s*[\d.]/.test(plain);
+    if (!isTriangleCaption && !isNumberedCaption) return match;
+    if (isNumberedCaption && !isTriangleCaption && !/text-align:\s*center/i.test(attrs)) {
+      return match;
     }
-  );
+    return `<p${withFigureCaptionAttrs(attrs)}>${inner}</p>`;
+  });
 
   return result;
 }
