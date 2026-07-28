@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ChevronRight, Layers } from "lucide-react";
 
 interface MagazineCoverSplashProps {
@@ -8,18 +8,26 @@ interface MagazineCoverSplashProps {
   onOpen: () => void;
 }
 
+function splitIssueTitle(title: string): { brand: string; volume: string | null } {
+  const match = title.match(/^(.+?)\s*[（(]\s*(.+?)\s*[）)]\s*$/);
+  if (!match) return { brand: title, volume: null };
+  return { brand: match[1].trim(), volume: match[2].trim() };
+}
+
 export function MagazineCoverSplash({
   title,
   editor,
   tagline,
   onOpen,
 }: MagazineCoverSplashProps) {
+  const { brand, volume } = useMemo(() => splitIssueTitle(title), [title]);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-center overflow-hidden bg-[#f2f1ed] text-[#222524] border-[10px] border-[#4e5d53]">
+    <div className="relative min-h-screen w-full flex flex-col overflow-hidden bg-[#f2f1ed] text-[#222524] border-[10px] border-[#4e5d53]">
       {/* Soft sage dot grid */}
       <div className="absolute inset-0 opacity-[0.12] pointer-events-none bg-[radial-gradient(#4e5d53_1px,transparent_1px)] [background-size:22px_22px]" />
 
@@ -31,9 +39,14 @@ export function MagazineCoverSplash({
         <Layers className="w-[42vw] h-[42vw] min-w-[280px] min-h-[280px] max-w-[520px] max-h-[520px] text-[#4e5d53]" strokeWidth={1} />
       </div>
 
-      <div className="my-auto text-center flex flex-col items-center z-10 max-w-2xl mx-auto px-6 py-12 -translate-y-4">
-        <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#222524] mb-4 leading-tight">
-          {title}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto w-full px-6 pt-10 pb-6">
+        <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#222524] mb-4 leading-[1.15]">
+          <span className="block sm:inline">{brand}</span>
+          {volume ? (
+            <span className="block sm:inline mt-1 sm:mt-0">
+              <span className="hidden sm:inline"> </span>({volume})
+            </span>
+          ) : null}
         </h1>
 
         <p className="font-serif text-[#4e5d53] text-xs sm:text-sm tracking-[0.12em] font-semibold mb-5">
@@ -54,7 +67,7 @@ export function MagazineCoverSplash({
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-6 z-10 mb-10 px-6 -translate-y-[152px]">
+      <div className="relative z-10 shrink-0 flex flex-col items-center px-6 pt-4 pb-10 sm:pb-12">
         <button
           type="button"
           onClick={onOpen}
