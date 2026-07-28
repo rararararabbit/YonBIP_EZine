@@ -42,7 +42,7 @@ export function getPastIssueLinks(currentIssueId: string): PastIssueLink[] {
   links.push({
     title: "BIP 技术与架构 (5月刊)",
     desc: "5月刊 · 智启新程",
-    url: "https://design.yonyoucloud.com/static/techzine-index.html",
+    url: "https://aiqa.yonyoucloud.com/techzine/techzine-index-des.html",
   });
 
   return links;
